@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">TaxiDriver</string>
+    <string name="title_of_register_page">TaxiDriver</string>
+    <string name="action_search">Search</string>
+    <string name="search_hint">Search</string>
+    <string name="toolbar_title">TaxiDriver</string>
+</resources>
