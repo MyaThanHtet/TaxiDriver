@@ -1,15 +1,24 @@
 package com.lightidea.taxidriver.activities;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.PorterDuff;
+import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.widget.ImageView;
 
+import androidx.annotation.DrawableRes;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentActivity;
 
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -17,7 +26,6 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.JointType;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
@@ -82,19 +90,18 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
         LatLng driverLocation = new LatLng(currentLatitude, currentlongitude);
         LatLng customerLocation = new LatLng(customer_latitude, customer_longitude);
         //marker for driver
+
         mMap.addMarker(new MarkerOptions()
                 .position(driverLocation).title("Driver")
-                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)));
+                .icon(BitmapDescriptorFactory.fromBitmap(getMarkerBitmapFromView(R.drawable.ic_car))));
+        mMap.moveCamera(CameraUpdateFactory.newLatLng(driverLocation));
 
         //marker for customer
         mMap.addMarker(new MarkerOptions().position(customerLocation).title(customerName)
-                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
-
-        LatLngBounds.Builder builder = new LatLngBounds.Builder();
-        LatLngBounds bounds = builder.build();
-        CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(bounds, 200);
-        mMap.moveCamera(cu);
+                .icon(BitmapDescriptorFactory.fromBitmap(getMarkerBitmapFromView(R.drawable.ic_baseline_person_pin_circle_24))));
+        mMap.moveCamera(CameraUpdateFactory.newLatLng(customerLocation));
         mMap.animateCamera(CameraUpdateFactory.zoomTo(14), 2000, null);
+
 
         //add polyline between two point
         Polyline polyline1 = mMap.addPolyline(new PolylineOptions()
@@ -103,8 +110,27 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
                         new LatLng(currentLatitude, currentlongitude),
                         new LatLng(customer_latitude, customer_longitude)
                 ));
+        polyline1.setColor(Color.YELLOW);
         polyline1.setEndCap(new RoundCap());
         polyline1.setJointType(JointType.ROUND);
     }
 
+    private Bitmap getMarkerBitmapFromView(@DrawableRes int resId) {
+
+        View customMarkerView = ((LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.view_custom_marker, null);
+        ImageView markerImageView = (ImageView) customMarkerView.findViewById(R.id.profile_image);
+        markerImageView.setImageResource(resId);
+        customMarkerView.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED);
+        customMarkerView.layout(0, 0, customMarkerView.getMeasuredWidth(), customMarkerView.getMeasuredHeight());
+        customMarkerView.buildDrawingCache();
+        Bitmap returnedBitmap = Bitmap.createBitmap(customMarkerView.getMeasuredWidth(), customMarkerView.getMeasuredHeight(),
+                Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(returnedBitmap);
+        canvas.drawColor(Color.WHITE, PorterDuff.Mode.SRC_IN);
+        Drawable drawable = customMarkerView.getBackground();
+        if (drawable != null)
+            drawable.draw(canvas);
+        customMarkerView.draw(canvas);
+        return returnedBitmap;
+    }
 }
