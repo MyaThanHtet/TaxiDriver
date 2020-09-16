@@ -9,6 +9,7 @@ import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentActivity;
 
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -16,6 +17,7 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.JointType;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
@@ -84,22 +86,25 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
                 .position(driverLocation).title("Driver")
                 .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)));
 
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(driverLocation));
-        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(driverLocation, 15f));
         //marker for customer
-        mMap.addMarker(new MarkerOptions().position(customerLocation).title(customerName));
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(customerLocation));
-        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(customerLocation, 15f));
+        mMap.addMarker(new MarkerOptions().position(customerLocation).title(customerName)
+                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
+
+        LatLngBounds.Builder builder = new LatLngBounds.Builder();
+        LatLngBounds bounds = builder.build();
+        CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(bounds, 200);
+        mMap.moveCamera(cu);
+        mMap.animateCamera(CameraUpdateFactory.zoomTo(14), 2000, null);
+
         //add polyline between two point
         Polyline polyline1 = mMap.addPolyline(new PolylineOptions()
                 .clickable(false)
                 .add(
                         new LatLng(currentLatitude, currentlongitude),
                         new LatLng(customer_latitude, customer_longitude)
-                     ));
+                ));
         polyline1.setEndCap(new RoundCap());
         polyline1.setJointType(JointType.ROUND);
     }
-
 
 }
